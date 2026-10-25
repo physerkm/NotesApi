@@ -1,0 +1,55 @@
+using Microsoft.AspNetCore.Mvc;
+using NotesApi.Dtos;
+using NotesApi.Services;
+
+namespace NotesApi.Controllers;
+
+// [ApiController]: gelen veriyi otomatik doğrular, hatalıysa 400 döner.
+[ApiController]
+[Route("api/notes")]
+public class NotesController : ControllerBase
+{
+    private readonly INoteService _noteService;
+
+    // Dependency Injection: servis Program.cs'te kaydedildi, .NET buraya otomatik verir.
+    public NotesController(INoteService noteService)
+    {
+        _noteService = noteService;
+    }
+
+    // GET api/notes
+    // GET api/notes?tag=csharp  -> sadece "csharp" etiketli notlar
+    [HttpGet]
+    public ActionResult<IEnumerable<NoteResponse>> GetAll([FromQuery] string? tag) =>
+        Ok(_noteService.GetAll(tag));
+
+    // GET api/notes/5
+    [HttpGet("{id:int}")]
+    public ActionResult<NoteResponse> GetById(int id)
+    {
+        var note = _noteService.GetById(id);
+        return note is null ? NotFound() : Ok(note);
+    }
+
+    // POST api/notes
+    [HttpPost]
+    public ActionResult<NoteResponse> Create(CreateNoteRequest request)
+    {
+        var note = _noteService.Create(request);
+        // 201 Created + yeni notun adresi (Location header)
+        return CreatedAtAction(nameof(GetById), new { id = note.Id }, note);
+    }
+
+    // PUT api/notes/5
+    [HttpPut("{id:int}")]
+    public ActionResult<NoteResponse> Update(int id, UpdateNoteRequest request)
+    {
+        var note = _noteService.Update(id, request);
+        return note is null ? NotFound() : Ok(note);
+    }
+
+    // DELETE api/notes/5
+    [HttpDelete("{id:int}")]
+    public IActionResult Delete(int id) =>
+        _noteService.Delete(id) ? NoContent() : NotFound();
+}

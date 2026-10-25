@@ -1,0 +1,34 @@
+@host = http://localhost:5107
+
+### Tüm notları listele
+GET {{host}}/api/notes
+Accept: application/json
+
+### Yeni not ekle ("C#" ve "c#" tek etiket olarak kaydedilir)
+POST {{host}}/api/notes
+Content-Type: application/json
+
+{
+  "title": "İlk notum",
+  "content": "REST API'de POST yeni kayıt oluşturur.",
+  "tags": ["C#", "c#", "backend", "  "]
+}
+
+### Etikete göre filtrele (büyük/küçük harf fark etmez)
+GET {{host}}/api/notes?tag=BACKEND
+
+### Tek not getir
+GET {{host}}/api/notes/1
+
+### Notu güncelle (etiketler yenileriyle değişir)
+PUT {{host}}/api/notes/1
+Content-Type: application/json
+
+{
+  "title": "İlk notum (güncel)",
+  "content": "PUT mevcut kaydı günceller.",
+  "tags": ["rest", "http"]
+}
+
+### Notu sil
+DELETE {{host}}/api/notes/1
