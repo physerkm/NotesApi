@@ -13,7 +13,7 @@ Backend geliştirmeyi adım adım öğrenirken büyüttüğüm bir proje: her ye
 - [x] Sıralama: en yeni, en eski veya başlığa göre Türkçe alfabetik (`tr-TR` comparer)
 - [x] Swagger arayüzü ile tarayıcıdan test
 - [ ] Veritabanı (Entity Framework Core)
-- [ ] Global hata yönetimi
+- [x] Global hata yönetimi: beklenmeyen hatalarda düzenli `500` yanıtı, log ve `traceId`
 - [ ] Kullanıcı kaydı ve JWT ile giriş
 - [ ] Birim testleri (xUnit)
 - [ ] Docker ve canlıya alma
@@ -32,6 +32,7 @@ src/NotesApi
 ├── Services/      # İş mantığı (INoteService + uygulaması)
 ├── Dtos/          # API'ye giren / çıkan veri şekilleri
 ├── Models/        # Uygulama içi veri modeli
+├── Infrastructure/ # Uygulama geneli altyapı (global hata yönetimi)
 └── Program.cs     # Servis kayıtları ve middleware ayarları
 ```
 
@@ -49,6 +50,8 @@ src/NotesApi
 | POST   | `/api/notes/undo-delete` | En son silinen notu geri getir | 200 OK |
 
 Not bulunamazsa `404 Not Found`, gönderilen veri hatalıysa `400 Bad Request` döner.
+Beklenmeyen bir hata olursa API çökmez, `500` ve bir `traceId` döner. Hatanın ayrıntısı sunucu log'una yazılır,
+canlı ortamda istemciye teknik bilgi gösterilmez.
 
 Örnek istek:
 

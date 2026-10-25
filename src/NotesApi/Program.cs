@@ -1,3 +1,4 @@
+using NotesApi.Infrastructure;
 using NotesApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,12 +7,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+// Hata yanıtlarını standart ProblemDetails (RFC 9457) biçiminde üretir.
+builder.Services.AddProblemDetails();
+// Yakalanmamış exception'ları GlobalExceptionHandler karşılar.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 // Bellekte tutulan notlar uygulama boyunca yaşasın diye Singleton.
 builder.Services.AddSingleton<INoteService, InMemoryNoteService>();
 
 var app = builder.Build();
 
 // --- İstek hattı (middleware pipeline) ---
+// En başta olmalı: kendinden sonra gelen her adımda oluşan hatayı yakalar.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi(); // /openapi/v1.json
