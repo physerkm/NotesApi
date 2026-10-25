@@ -72,3 +72,11 @@ Yeni kodda bunların yerine generic (`<T>`) versiyonları kullanırım.
 - Yanıtta etiketler `IReadOnlyCollection<string>` olarak dönüyor. Bu, içerideki setin kopyası (`ToArray()`). Dışarıya verilen nesne üzerinden içerideki veri değiştirilemiyor.
 - `HashSet` sıra garantisi vermediği için yanıtta etiketler alfabetik sıralanıyor.
 - Güncellemede eski setin içeriği değiştirilmiyor, yerine yeni bir set atanıyor. Böylece aynı anda notu okuyan başka bir istek yarım kalmış bir set görmüyor.
+
+### Silmeyi geri alma
+
+- Silinen notlar bir yığında (stack) tutuluyor. Yığında **son giren ilk çıkar (LIFO)**: A, sonra B silinirse ilk geri alma B'yi, ikincisi A'yı getiriyor.
+- `Delete` notu sözlükten çıkarıp yığının üstüne koyuyor (`Push`). `UndoDelete` en üstteki notu alıp sözlüğe geri koyuyor (`TryPop`).
+- `Stack<T>` yerine `ConcurrentStack<T>` kullandım. `Stack<T>` thread-safe değil, aynı anda gelen iki istek yığını bozabilir.
+- `Stack<T>.Pop` boş yığında hata fırlatır. `TryPop` ise hata fırlatmadan `false` döner. Bu sayede yığın boşken API `404` ile açıklayıcı bir mesaj döndürüyor.
+- Not geri gelirken aynı `Id` ile geri konuyor. `Id`'ler `Interlocked.Increment` ile sürekli arttığı ve hiç tekrar kullanılmadığı için çakışma olmuyor.

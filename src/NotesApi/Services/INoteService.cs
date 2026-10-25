@@ -12,4 +12,7 @@ public interface INoteService
     NoteResponse Create(CreateNoteRequest request);
     NoteResponse? Update(int id, UpdateNoteRequest request);
     bool Delete(int id);
+
+    // En son silinen notu geri getirir. Geri alınacak not yoksa null döner.
+    NoteResponse? UndoDelete();
 }

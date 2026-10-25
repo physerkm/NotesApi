@@ -8,6 +8,7 @@ Backend geliştirmeyi adım adım öğrenirken büyüttüğüm bir proje: her ye
 - [x] Not ekleme, listeleme, güncelleme, silme (CRUD)
 - [x] Gelen verinin doğrulanması (validation)
 - [x] Etiketler: tekrarsız, büyük/küçük harf duyarsız (`HashSet`) ve etikete göre filtreleme
+- [x] Silmeyi geri alma: en son silinen not önce geri gelir (`ConcurrentStack`, LIFO)
 - [x] Swagger arayüzü ile tarayıcıdan test
 - [ ] Veritabanı (Entity Framework Core)
 - [ ] Global hata yönetimi
@@ -42,6 +43,7 @@ src/NotesApi
 | POST   | `/api/notes`      | Yeni not ekle      | 201 Created    |
 | PUT    | `/api/notes/{id}` | Notu güncelle      | 200 OK         |
 | DELETE | `/api/notes/{id}` | Notu sil           | 204 No Content |
+| POST   | `/api/notes/undo-delete` | En son silinen notu geri getir | 200 OK |
 
 Not bulunamazsa `404 Not Found`, gönderilen veri hatalıysa `400 Bad Request` döner.
 

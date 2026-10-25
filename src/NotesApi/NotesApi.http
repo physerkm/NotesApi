@@ -32,3 +32,6 @@ Content-Type: application/json
 
 ### Notu sil
 DELETE {{host}}/api/notes/1
+
+### Silmeyi geri al (en son silinen not geri gelir)
+POST {{host}}/api/notes/undo-delete

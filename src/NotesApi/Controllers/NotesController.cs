@@ -52,4 +52,16 @@ public class NotesController : ControllerBase
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id) =>
         _noteService.Delete(id) ? NoContent() : NotFound();
+
+    // POST api/notes/undo-delete
+    // POST kullanıyoruz çünkü bu istek sunucudaki durumu değiştiriyor.
+    [HttpPost("undo-delete")]
+    public ActionResult<NoteResponse> UndoDelete()
+    {
+        var note = _noteService.UndoDelete();
+        return note is null
+            ? Problem(statusCode: StatusCodes.Status404NotFound,
+                      title: "Geri alınacak silinmiş not yok.")
+            : Ok(note);
+    }
 }

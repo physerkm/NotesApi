@@ -12,6 +12,10 @@ public class InMemoryNoteService : INoteService
     private readonly ConcurrentDictionary<int, Note> _notes = new();
     private int _lastId;
 
+    // Silinen notlar yığını (LIFO): en son silinen en üstte durur.
+    // Stack<T> thread-safe değil; aynı mantığın thread-safe hali ConcurrentStack<T>.
+    private readonly ConcurrentStack<Note> _deletedNotes = new();
+
     public IEnumerable<NoteResponse> GetAll(string? tag = null)
     {
         IEnumerable<Note> notes = _notes.Values;
@@ -59,7 +63,26 @@ public class InMemoryNoteService : INoteService
         return ToResponse(note);
     }
 
-    public bool Delete(int id) => _notes.TryRemove(id, out _);
+    public bool Delete(int id)
+    {
+        if (!_notes.TryRemove(id, out var note))
+            return false;
+
+        _deletedNotes.Push(note); // Yığının en üstüne koy.
+        return true;
+    }
+
+    public NoteResponse? UndoDelete()
+    {
+        // TryPop: en üstteki notu alır ve yığından çıkarır. Yığın boşsa false döner.
+        // (Stack<T>.Pop boş yığında hata fırlatır; TryPop fırlatmaz.)
+        if (!_deletedNotes.TryPop(out var note))
+            return null;
+
+        // Id'ler hiç tekrar kullanılmadığı için (Interlocked.Increment) aynı Id ile geri koymak güvenli.
+        _notes[note.Id] = note;
+        return ToResponse(note);
+    }
 
     // Boş etiketleri atar, baş/son boşlukları siler, tekrarları HashSet ayıklar.
     private static HashSet<string> NormalizeTags(IEnumerable<string>? tags)
