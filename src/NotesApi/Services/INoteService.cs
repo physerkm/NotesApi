@@ -8,7 +8,9 @@ public interface INoteService
 {
     // tag verilirse sadece o etiketi taşıyan notlar döner.
     // sort: sonuçların sırası (varsayılan: en yeni önce).
-    IEnumerable<NoteResponse> GetAll(string? tag = null, NoteSort sort = NoteSort.Newest);
+    // page / pageSize: hangi sayfanın, sayfa başına kaç kayıtla döneceği.
+    PagedResponse<NoteResponse> GetAll(
+        string? tag = null, NoteSort sort = NoteSort.Newest, int page = 1, int pageSize = 20);
     NoteResponse? GetById(int id);
     NoteResponse Create(CreateNoteRequest request);
     NoteResponse? Update(int id, UpdateNoteRequest request);

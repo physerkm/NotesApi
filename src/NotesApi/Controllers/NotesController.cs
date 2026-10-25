@@ -23,24 +23,29 @@ public class NotesController : ControllerBase
     }
 
     /// <summary>
-    /// Notları listeler.
+    /// Notları sayfa sayfa listeler.
     /// </summary>
     /// <remarks>
-    /// Etikete göre filtrelenebilir ve sıralanabilir, ikisi birlikte de kullanılabilir.
-    /// Örnekler: <c>?tag=backend</c>, <c>?sort=title</c>
+    /// Etikete göre filtrelenebilir, sıralanabilir ve sayfalanabilir; hepsi birlikte de kullanılabilir.
+    /// Örnekler: <c>?tag=backend</c>, <c>?sort=title</c>, <c>?page=2</c>, <c>?pageSize=50</c>
     /// </remarks>
     /// <param name="tag">Sadece bu etiketi taşıyan notlar döner. Büyük/küçük harf fark etmez, "İstanbul" ile "istanbul" aynıdır.</param>
     /// <param name="sort">Sıralama: <c>Newest</c> (varsayılan, en yeni önce), <c>Oldest</c> veya <c>Title</c> (başlığa göre Türkçe alfabetik).</param>
-    /// <response code="200">Not listesi. Hiç not yoksa boş liste döner.</response>
-    /// <response code="400">Geçersiz sıralama değeri.</response>
+    /// <param name="page">Sayfa numarası. 1'den başlar, varsayılan 1.</param>
+    /// <param name="pageSize">Sayfa başına not sayısı. 1 ile 100 arası, varsayılan 20.</param>
+    /// <response code="200">İstenen sayfa ve toplam kayıt bilgisi. Hiç not yoksa boş sayfa döner.</response>
+    /// <response code="400">Geçersiz sıralama, sayfa numarası ya da sayfa boyutu.</response>
     // EnumDataType: ?sort=99 gibi tanımsız sayıları reddeder (400).
+    // Range: ?page=0 ya da ?pageSize=1000 gibi değerleri reddeder (400).
     [HttpGet]
-    [ProducesResponseType<IEnumerable<NoteResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PagedResponse<NoteResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IEnumerable<NoteResponse>> GetAll(
+    public ActionResult<PagedResponse<NoteResponse>> GetAll(
         [FromQuery] string? tag,
-        [FromQuery, EnumDataType(typeof(NoteSort))] NoteSort sort = NoteSort.Newest) =>
-        Ok(_noteService.GetAll(tag, sort));
+        [FromQuery, EnumDataType(typeof(NoteSort))] NoteSort sort = NoteSort.Newest,
+        [FromQuery, Range(1, int.MaxValue)] int page = 1,
+        [FromQuery, Range(1, 100)] int pageSize = 20) =>
+        Ok(_noteService.GetAll(tag, sort, page, pageSize));
 
     /// <summary>
     /// Tek bir notu getirir.

@@ -46,6 +46,13 @@ public static class NoteMappingExtensions          // sınıf static
   CS1061 hatası aldım: "...genişletme yöntemi bulunamadı (bir kullanma yönergeniz eksik olabilir mi?)".
 - Dönüşüm etiketleri Türkçe sıralıyor. Bu yüzden servisteki `private` Türkçe karşılaştırıcıyı herkesin
   kullanabileceği `Models/TextComparers.Turkish` alanına taşıdım.
+- **Öncelik kuralı:** Sınıfın kendi metodu (instance method) extension method'a **her zaman** üstün gelir.
+  `Note` içinde de `ToResponse()` olsaydı `note.ToResponse()` sınıfınkini çağırırdı. Kodun yazılma sırası önemli değil.
+  Derleyici önce sınıfa bakar, extension method'lara ancak sınıfta uygun metot yoksa bakar.
+  Extension method'a ulaşmanın tek yolu açıkça `NoteMappingExtensions.ToResponse(note)` yazmak olurdu.
+  Küçük bir deneme programıyla doğruladım.
+  - Neden: Kural tersi olsaydı dışarıdan eklenen bir kütüphane, bir sınıfın kendi davranışını sessizce ezebilirdi.
+  - Kısaca: Extension method var olanı **ezemez**, sadece **eksik olanı tamamlar**.
 
 ## Bu projede: global hata yönetimi
 

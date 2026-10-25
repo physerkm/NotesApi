@@ -11,6 +11,7 @@ Backend geliştirmeyi adım adım öğrenirken büyüttüğüm bir proje: her ye
 - [x] Türkçe I desteği: `İstanbul`, `ISTANBUL` ve `istanbul` aynı etiket, `LINQ` ve `linq` de aynı (özel `TagComparer`)
 - [x] Silmeyi geri alma: en son silinen not önce geri gelir (`ConcurrentStack`, LIFO)
 - [x] Sıralama: en yeni, en eski veya başlığa göre Türkçe alfabetik (`tr-TR` comparer)
+- [x] Sayfalama: `?page=` ve `?pageSize=` ile, toplam kayıt ve sayfa sayısıyla birlikte (LINQ `Skip` / `Take`)
 - [x] Swagger arayüzü ile tarayıcıdan test: her endpoint, parametre ve alan için açıklama ve olası durum kodları
 - [ ] Veritabanı (Entity Framework Core)
 - [x] Global hata yönetimi: beklenmeyen hatalarda düzenli `500` yanıtı, log ve `traceId`
@@ -41,9 +42,10 @@ src/NotesApi
 
 | Metot  | Adres             | Açıklama           | Başarılı yanıt |
 |--------|-------------------|--------------------|----------------|
-| GET    | `/api/notes`      | Tüm notları getir  | 200 OK         |
+| GET    | `/api/notes`      | Notları sayfa sayfa getir (varsayılan: 1. sayfa, 20 not) | 200 OK |
 | GET    | `/api/notes?tag=backend` | Etikete göre filtrele | 200 OK  |
 | GET    | `/api/notes?sort=title`  | Sırala: `newest` (varsayılan), `oldest`, `title` | 200 OK |
+| GET    | `/api/notes?page=2&pageSize=10` | Sayfala: `page` 1'den başlar, `pageSize` 1–100 | 200 OK |
 | GET    | `/api/notes/{id}` | Tek not getir      | 200 OK         |
 | POST   | `/api/notes`      | Yeni not ekle      | 201 Created    |
 | PUT    | `/api/notes/{id}` | Notu güncelle      | 200 OK         |
@@ -69,6 +71,19 @@ Yanıtta `"tags": ["backend", "C#"]` döner: tekrar eden `c#` ayıklanır.
 
 `?sort=title` Türkçe alfabeyi kullanır: `Cam, Çiçek, Dağ, Ilık, İnce, Ödev, Şeker, Zeytin`.
 (Standart karşılaştırma `Çiçek`, `Ödev` ve `Şeker`i `Zeytin`den sonraya koyardı.)
+
+Liste yanıtı sayfalıdır. Filtre, sıralama ve sayfalama birlikte kullanılabilir:
+
+```json
+GET /api/notes?tag=backend&sort=title&page=2&pageSize=5
+{
+  "items": [ { "id": 7, "title": "...", "tags": ["backend"], ... } ],
+  "page": 2,
+  "pageSize": 5,
+  "totalCount": 12,
+  "totalPages": 3
+}
+```
 
 ## Çalıştırma
 

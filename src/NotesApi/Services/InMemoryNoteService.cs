@@ -17,7 +17,8 @@ public class InMemoryNoteService : INoteService
     // Stack<T> thread-safe değil; aynı mantığın thread-safe hali ConcurrentStack<T>.
     private readonly ConcurrentStack<Note> _deletedNotes = new();
 
-    public IEnumerable<NoteResponse> GetAll(string? tag = null, NoteSort sort = NoteSort.Newest)
+    public PagedResponse<NoteResponse> GetAll(
+        string? tag = null, NoteSort sort = NoteSort.Newest, int page = 1, int pageSize = 20)
     {
         IEnumerable<Note> notes = _notes.Values;
 
@@ -40,7 +41,25 @@ public class InMemoryNoteService : INoteService
             _               => notes.OrderByDescending(n => n.CreatedAt).ThenByDescending(n => n.Id)
         };
 
-        return sorted.Select(n => n.ToResponse()).ToList();
+        // Deferred execution: buraya kadar hiçbir şey çalışmadı, sadece sorgu tarifi hazırlandı.
+        // ToList ile filtre + sıralama bir kez çalışır. Count ve Skip/Take aynı listeyi kullanır.
+        // ToList olmasaydı Count ve Skip/Take sorguyu iki kez baştan çalıştırırdı (reevaluation).
+        List<Note> matching = sorted.ToList();
+
+        // long: page çok büyükse (ör. int.MaxValue) int çarpımı taşar, negatife döner
+        // ve Skip hiçbir şey atlamaz; yanlışlıkla ilk sayfa dönerdi.
+        long skip = (long)(page - 1) * pageSize;
+
+        List<NoteResponse> items = skip >= matching.Count
+            ? []   // Son sayfa aşıldı: boş sayfa.
+            : matching
+                .Skip((int)skip)   // Önceki sayfaları atla...
+                .Take(pageSize)    // ...bu sayfanın kayıtlarını al.
+                .Select(n => n.ToResponse())
+                .ToList();
+
+        int totalPages = (int)Math.Ceiling(matching.Count / (double)pageSize);
+        return new PagedResponse<NoteResponse>(items, page, pageSize, matching.Count, totalPages);
     }
 
     public NoteResponse? GetById(int id) =>

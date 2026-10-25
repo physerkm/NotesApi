@@ -23,6 +23,9 @@ GET {{host}}/api/notes?sort=title
 ### Filtre ve sıralama birlikte
 GET {{host}}/api/notes?tag=backend&sort=oldest
 
+### Sayfalama (sayfa başına 5 not, 2. sayfa)
+GET {{host}}/api/notes?page=2&pageSize=5
+
 ### Tek not getir
 GET {{host}}/api/notes/1
 
