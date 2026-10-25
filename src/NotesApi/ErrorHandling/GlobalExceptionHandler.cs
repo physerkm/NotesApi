@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NotesApi.Infrastructure;
+namespace NotesApi.ErrorHandling;
 
 // Uygulamanın herhangi bir yerinde yakalanmamış bir exception olursa burası çalışır.
 // Amaç: API çökmek yerine düzenli bir 500 yanıtı dönsün, hata da log'a yazılsın.

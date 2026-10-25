@@ -13,7 +13,7 @@ ve her konuyu bu projede nerede kullandığımı yazdım.
 | `try` / `catch` / `finally` | Hata yakalama ve temizlik | `GlobalExceptionHandler` |
 | TryXXX deseni | Hata fırlatmak yerine `false` dönmek | `TryGetValue`, `TryRemove`, `TryPop` |
 | Nullable (`?`, `??`, `?.`) | Değerin boş olabileceğini tipte göstermek | `DateTime? UpdatedAt`, `string? tag`, `Content ?? string.Empty` |
-| Extension method | Var olan bir tipe, onu değiştirmeden metot eklemek | `Where`, `OrderBy`, `AddControllers()`, `AddSingleton()` |
+| Extension method | Var olan bir tipe, onu değiştirmeden metot eklemek | Hazır olanlar: `Where`, `OrderBy`, `AddControllers()`. Kendi yazdığım: `note.ToResponse()` (aşağıda) |
 | Record | Değiştirilemeyen, içeriğe göre karşılaştırılan veri tipi | Bütün DTO'lar |
 | Attribute (`[...]`) | Koda ek bilgi eklemek, framework bu bilgiyi okur | `[ApiController]`, `[HttpGet]`, `[Required]`, `[FromQuery]`, `[JsonConverter]` |
 | Pattern matching | `is`, `switch` ifadesi, `_` (geri kalan her şey) | `note is null ? ...`, `sort switch { ... }` |
@@ -26,6 +26,26 @@ ve her konuyu bu projede nerede kullandığımı yazdım.
 - **Önlenebilir hatalar için exception kullanma, önceden kontrol et.** Exception yakalamak yavaş bir işlemdir.
   Projede notu bulamamak normal bir durum, bu yüzden exception değil `TryGetValue` + `404` kullanıyorum.
 - **Güven sınırını geçerken teknik ayrıntı sızdırma.** Kullanıcıya genel bir mesaj ver, ayrıntıyı log'a yaz.
+
+## Bu projede: kendi extension method'um
+
+`Note` → `NoteResponse` dönüşümü (mapping) önceden servisin içinde `private` bir metottu.
+`Mappings/NoteMappingExtensions.cs` dosyasına extension method olarak taşıdım:
+
+```csharp
+public static class NoteMappingExtensions          // sınıf static
+{
+    public static NoteResponse ToResponse(this Note note) => ...   // metot static, ilk parametrede "this"
+}
+```
+
+- Kullanımı `note.ToResponse()`. Derleyici bunu `NoteMappingExtensions.ToResponse(note)` çağrısına çeviriyor,
+  yani sadece daha okunaklı bir yazım.
+- `Note` sınıfına hiç dokunmadım. Model sadece veriyi tutuyor, API'ye nasıl gösterileceğini bilmiyor.
+- **Namespace kuralı:** `using NotesApi.Mappings;` olmadan derleyici metodu bulamıyor. Denedim ve
+  CS1061 hatası aldım: "...genişletme yöntemi bulunamadı (bir kullanma yönergeniz eksik olabilir mi?)".
+- Dönüşüm etiketleri Türkçe sıralıyor. Bu yüzden servisteki `private` Türkçe karşılaştırıcıyı herkesin
+  kullanabileceği `Models/TextComparers.Turkish` alanına taşıdım.
 
 ## Bu projede: global hata yönetimi
 

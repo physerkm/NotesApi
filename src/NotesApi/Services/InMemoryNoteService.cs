@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using System.Globalization;
 using NotesApi.Dtos;
+using NotesApi.Mappings; // note.ToResponse() extension method'u buradan geliyor.
 using NotesApi.Models;
 
 namespace NotesApi.Services;
@@ -16,13 +16,6 @@ public class InMemoryNoteService : INoteService
     // Silinen notlar yığını (LIFO): en son silinen en üstte durur.
     // Stack<T> thread-safe değil; aynı mantığın thread-safe hali ConcurrentStack<T>.
     private readonly ConcurrentStack<Note> _deletedNotes = new();
-
-    // Türkçe alfabe kurallarıyla karşılaştırır: C < Ç < D, I < İ, O < Ö, S < Ş, U < Ü.
-    // Ordinal karşılaştırma harfin kod numarasına bakar ve "Çiçek"i "Zeytin"den sonraya koyar.
-    // ignoreCase: true -> "elma" ve "Elma" sıralamada yan yana gelir.
-    // static readonly: bir kez oluşturulur, her istekte yeniden yaratılmaz.
-    private static readonly StringComparer TurkishComparer =
-        StringComparer.Create(new CultureInfo("tr-TR"), ignoreCase: true);
 
     public IEnumerable<NoteResponse> GetAll(string? tag = null, NoteSort sort = NoteSort.Newest)
     {
@@ -43,15 +36,15 @@ public class InMemoryNoteService : INoteService
         IOrderedEnumerable<Note> sorted = sort switch
         {
             NoteSort.Oldest => notes.OrderBy(n => n.CreatedAt).ThenBy(n => n.Id),
-            NoteSort.Title  => notes.OrderBy(n => n.Title, TurkishComparer).ThenBy(n => n.Id),
+            NoteSort.Title  => notes.OrderBy(n => n.Title, TextComparers.Turkish).ThenBy(n => n.Id),
             _               => notes.OrderByDescending(n => n.CreatedAt).ThenByDescending(n => n.Id)
         };
 
-        return sorted.Select(ToResponse).ToList();
+        return sorted.Select(n => n.ToResponse()).ToList();
     }
 
     public NoteResponse? GetById(int id) =>
-        _notes.TryGetValue(id, out var note) ? ToResponse(note) : null;
+        _notes.TryGetValue(id, out var note) ? note.ToResponse() : null;
 
     public NoteResponse Create(CreateNoteRequest request)
     {
@@ -65,7 +58,7 @@ public class InMemoryNoteService : INoteService
         };
 
         _notes[note.Id] = note;
-        return ToResponse(note);
+        return note.ToResponse();
     }
 
     public NoteResponse? Update(int id, UpdateNoteRequest request)
@@ -79,7 +72,7 @@ public class InMemoryNoteService : INoteService
         // Böylece o sırada notu okuyan başka bir istek yarım kalmış bir set görmez.
         note.Tags = NormalizeTags(request.Tags);
         note.UpdatedAt = DateTime.UtcNow;
-        return ToResponse(note);
+        return note.ToResponse();
     }
 
     public bool Delete(int id)
@@ -100,7 +93,7 @@ public class InMemoryNoteService : INoteService
 
         // Id'ler hiç tekrar kullanılmadığı için (Interlocked.Increment) aynı Id ile geri koymak güvenli.
         _notes[note.Id] = note;
-        return ToResponse(note);
+        return note.ToResponse();
     }
 
     // Boş etiketleri atar, baş/son boşlukları siler, tekrarları HashSet ayıklar.
@@ -117,14 +110,4 @@ public class InMemoryNoteService : INoteService
         }
         return set;
     }
-
-    // HashSet sıra garantisi vermez, bu yüzden yanıtta Türkçe alfabetik sıralıyoruz.
-    // ToArray() bir kopya üretir: dışarı verdiğimiz şey içerideki seti değiştiremez.
-    private static NoteResponse ToResponse(Note n) =>
-        new(n.Id,
-            n.Title,
-            n.Content,
-            n.Tags.Order(TurkishComparer).ToArray(),
-            n.CreatedAt,
-            n.UpdatedAt);
 }

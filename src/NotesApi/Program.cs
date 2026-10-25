@@ -1,4 +1,4 @@
-using NotesApi.Infrastructure;
+using NotesApi.ErrorHandling;
 using NotesApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -31,8 +31,9 @@ src/NotesApi
 ├── Controllers/   # HTTP isteklerini karşılayan katman
 ├── Services/      # İş mantığı (INoteService + uygulaması)
 ├── Dtos/          # API'ye giren / çıkan veri şekilleri
-├── Models/        # Uygulama içi veri modeli
-├── Infrastructure/ # Uygulama geneli altyapı (global hata yönetimi)
+├── Models/        # Uygulama içi veri modeli ve metin karşılaştırıcıları
+├── Mappings/      # Model -> DTO dönüşümleri (extension method)
+├── ErrorHandling/ # Global hata yönetimi (yakalanmamış hatalar -> 500 + log)
 └── Program.cs     # Servis kayıtları ve middleware ayarları
 ```
 
