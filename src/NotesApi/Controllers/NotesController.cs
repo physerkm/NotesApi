@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using NotesApi.Dtos;
 using NotesApi.Services;
@@ -19,9 +20,13 @@ public class NotesController : ControllerBase
 
     // GET api/notes
     // GET api/notes?tag=csharp  -> sadece "csharp" etiketli notlar
+    // GET api/notes?sort=title   -> başlığa göre Türkçe alfabetik
+    // EnumDataType: ?sort=99 gibi tanımsız sayıları reddeder (400).
     [HttpGet]
-    public ActionResult<IEnumerable<NoteResponse>> GetAll([FromQuery] string? tag) =>
-        Ok(_noteService.GetAll(tag));
+    public ActionResult<IEnumerable<NoteResponse>> GetAll(
+        [FromQuery] string? tag,
+        [FromQuery, EnumDataType(typeof(NoteSort))] NoteSort sort = NoteSort.Newest) =>
+        Ok(_noteService.GetAll(tag, sort));
 
     // GET api/notes/5
     [HttpGet("{id:int}")]

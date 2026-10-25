@@ -17,6 +17,12 @@ Content-Type: application/json
 ### Etikete göre filtrele (büyük/küçük harf fark etmez)
 GET {{host}}/api/notes?tag=BACKEND
 
+### Başlığa göre Türkçe alfabetik sırala (newest | oldest | title)
+GET {{host}}/api/notes?sort=title
+
+### Filtre ve sıralama birlikte
+GET {{host}}/api/notes?tag=backend&sort=oldest
+
 ### Tek not getir
 GET {{host}}/api/notes/1
 

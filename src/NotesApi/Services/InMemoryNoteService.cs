@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Globalization;
 using NotesApi.Dtos;
 using NotesApi.Models;
 
@@ -16,7 +17,14 @@ public class InMemoryNoteService : INoteService
     // Stack<T> thread-safe değil; aynı mantığın thread-safe hali ConcurrentStack<T>.
     private readonly ConcurrentStack<Note> _deletedNotes = new();
 
-    public IEnumerable<NoteResponse> GetAll(string? tag = null)
+    // Türkçe alfabe kurallarıyla karşılaştırır: C < Ç < D, I < İ, O < Ö, S < Ş, U < Ü.
+    // Ordinal karşılaştırma harfin kod numarasına bakar ve "Çiçek"i "Zeytin"den sonraya koyar.
+    // ignoreCase: true -> "elma" ve "Elma" sıralamada yan yana gelir.
+    // static readonly: bir kez oluşturulur, her istekte yeniden yaratılmaz.
+    private static readonly StringComparer TurkishComparer =
+        StringComparer.Create(new CultureInfo("tr-TR"), ignoreCase: true);
+
+    public IEnumerable<NoteResponse> GetAll(string? tag = null, NoteSort sort = NoteSort.Newest)
     {
         IEnumerable<Note> notes = _notes.Values;
 
@@ -25,10 +33,16 @@ public class InMemoryNoteService : INoteService
         if (!string.IsNullOrWhiteSpace(tag))
             notes = notes.Where(n => n.Tags.Contains(tag.Trim()));
 
-        return notes
-            .OrderByDescending(n => n.CreatedAt)
-            .Select(ToResponse)
-            .ToList();
+        // switch ifadesi: her sıralama seçeneği için bir sorgu.
+        // ThenBy(Id): başlıklar aynıysa sıra her seferinde aynı olsun diye ikinci ölçüt.
+        IOrderedEnumerable<Note> sorted = sort switch
+        {
+            NoteSort.Oldest => notes.OrderBy(n => n.CreatedAt).ThenBy(n => n.Id),
+            NoteSort.Title  => notes.OrderBy(n => n.Title, TurkishComparer).ThenBy(n => n.Id),
+            _               => notes.OrderByDescending(n => n.CreatedAt).ThenByDescending(n => n.Id)
+        };
+
+        return sorted.Select(ToResponse).ToList();
     }
 
     public NoteResponse? GetById(int id) =>
@@ -99,13 +113,13 @@ public class InMemoryNoteService : INoteService
         return set;
     }
 
-    // HashSet sıra garantisi vermez, bu yüzden yanıtta alfabetik sıralıyoruz.
+    // HashSet sıra garantisi vermez, bu yüzden yanıtta Türkçe alfabetik sıralıyoruz.
     // ToArray() bir kopya üretir: dışarı verdiğimiz şey içerideki seti değiştiremez.
     private static NoteResponse ToResponse(Note n) =>
         new(n.Id,
             n.Title,
             n.Content,
-            n.Tags.Order(StringComparer.OrdinalIgnoreCase).ToArray(),
+            n.Tags.Order(TurkishComparer).ToArray(),
             n.CreatedAt,
             n.UpdatedAt);
 }

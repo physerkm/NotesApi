@@ -7,7 +7,8 @@ namespace NotesApi.Services;
 public interface INoteService
 {
     // tag verilirse sadece o etiketi taşıyan notlar döner.
-    IEnumerable<NoteResponse> GetAll(string? tag = null);
+    // sort: sonuçların sırası (varsayılan: en yeni önce).
+    IEnumerable<NoteResponse> GetAll(string? tag = null, NoteSort sort = NoteSort.Newest);
     NoteResponse? GetById(int id);
     NoteResponse Create(CreateNoteRequest request);
     NoteResponse? Update(int id, UpdateNoteRequest request);

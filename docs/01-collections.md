@@ -80,3 +80,19 @@ Yeni kodda bunların yerine generic (`<T>`) versiyonları kullanırım.
 - `Stack<T>` yerine `ConcurrentStack<T>` kullandım. `Stack<T>` thread-safe değil, aynı anda gelen iki istek yığını bozabilir.
 - `Stack<T>.Pop` boş yığında hata fırlatır. `TryPop` ise hata fırlatmadan `false` döner. Bu sayede yığın boşken API `404` ile açıklayıcı bir mesaj döndürüyor.
 - Not geri gelirken aynı `Id` ile geri konuyor. `Id`'ler `Interlocked.Increment` ile sürekli arttığı ve hiç tekrar kullanılmadığı için çakışma olmuyor.
+
+### Türkçe alfabetik sıralama
+
+- `?sort=title` başlıkları `StringComparer.Create(new CultureInfo("tr-TR"), ignoreCase: true)` ile sıralıyor.
+- Neden gerekli: Ordinal karşılaştırma harfin kod numarasına bakar. `Ç`, `Ö`, `Ş`, `Ü` gibi harflerin numarası `Z`den büyük olduğu için en sona düşerler. Büyük harfler de küçüklerden önce gelir.
+
+| Yöntem | Sonuç |
+|---|---|
+| Ordinal | `Zeytin ağaç ikinci çay ılık şiir` |
+| `tr-TR` | `ağaç çay ılık ikinci şiir Zeytin` |
+
+- Türkçede `ı` (noktasız) `i`den önce gelir. `tr-TR` bunu da doğru yapıyor: `Ilık` → `İnce`.
+- Comparer `static readonly` bir alan: bir kez oluşturuluyor, her istekte yeniden yaratılmıyor.
+- Aynı comparer'ı etiketleri sıralarken de kullanıyorum ki başlıklar ve etiketler aynı kurala uysun.
+- `OrderBy(...).ThenBy(n => n.Id)`: Başlıklar aynıysa sıranın her seferinde aynı kalması için ikinci bir ölçüt.
+- Sıralama seçenekleri bir `enum` (`NoteSort`). Geçersiz değerler (`?sort=abc`, `?sort=99`) otomatik olarak 400 döndürüyor.

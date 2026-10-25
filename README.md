@@ -9,6 +9,7 @@ Backend geliştirmeyi adım adım öğrenirken büyüttüğüm bir proje: her ye
 - [x] Gelen verinin doğrulanması (validation)
 - [x] Etiketler: tekrarsız, büyük/küçük harf duyarsız (`HashSet`) ve etikete göre filtreleme
 - [x] Silmeyi geri alma: en son silinen not önce geri gelir (`ConcurrentStack`, LIFO)
+- [x] Sıralama: en yeni, en eski veya başlığa göre Türkçe alfabetik (`tr-TR` comparer)
 - [x] Swagger arayüzü ile tarayıcıdan test
 - [ ] Veritabanı (Entity Framework Core)
 - [ ] Global hata yönetimi
@@ -39,6 +40,7 @@ src/NotesApi
 |--------|-------------------|--------------------|----------------|
 | GET    | `/api/notes`      | Tüm notları getir  | 200 OK         |
 | GET    | `/api/notes?tag=backend` | Etikete göre filtrele | 200 OK  |
+| GET    | `/api/notes?sort=title`  | Sırala: `newest` (varsayılan), `oldest`, `title` | 200 OK |
 | GET    | `/api/notes/{id}` | Tek not getir      | 200 OK         |
 | POST   | `/api/notes`      | Yeni not ekle      | 201 Created    |
 | PUT    | `/api/notes/{id}` | Notu güncelle      | 200 OK         |
@@ -59,6 +61,9 @@ POST /api/notes
 ```
 
 Yanıtta `"tags": ["backend", "C#"]` döner: tekrar eden `c#` ayıklanır.
+
+`?sort=title` Türkçe alfabeyi kullanır: `Cam, Çiçek, Dağ, Ilık, İnce, Ödev, Şeker, Zeytin`.
+(Standart karşılaştırma `Çiçek`, `Ödev` ve `Şeker`i `Zeytin`den sonraya koyardı.)
 
 ## Çalıştırma
 
