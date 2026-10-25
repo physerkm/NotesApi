@@ -9,7 +9,7 @@ ve her konuyu bu projede nerede kullandığımı yazdım.
 |---|---|---|
 | Delegate, `Func` / `Action` | Bir metodu değişken gibi taşımak. `Func<Note, bool>`: Note alır, bool döner. | LINQ metotlarına verilen fonksiyonlar |
 | Lambda (`=>`) | İsimsiz, kısa metot | `Where(n => ...)`, `OrderBy(n => n.Title, ...)`, Program.cs'teki `options => { ... }` |
-| Closure | Lambda dışarıdaki değişkeni yakalar, değeri **çalıştığı anda** okur | `GetAll` içinde `Where` lambdası `tag` değişkenini yakalıyor |
+| Closure | Lambda dışarıdaki değişkeni yakalar, değeri **çalıştığı anda** okur | `GetAll` içinde `Where` lambdası `trimmedTag` değişkenini yakalıyor. İlk hali `tag.Trim()`'i lambdanın içinde çağırıyordu, yani her not için tekrar çalışıyordu. Trim'i bir kez yapıp sonucu yakalamak daha doğru. |
 | `try` / `catch` / `finally` | Hata yakalama ve temizlik | `GlobalExceptionHandler` |
 | TryXXX deseni | Hata fırlatmak yerine `false` dönmek | `TryGetValue`, `TryRemove`, `TryPop` |
 | Nullable (`?`, `??`, `?.`) | Değerin boş olabileceğini tipte göstermek | `DateTime? UpdatedAt`, `string? tag`, `Content ?? string.Empty` |

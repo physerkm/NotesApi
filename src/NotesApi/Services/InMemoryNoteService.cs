@@ -31,7 +31,12 @@ public class InMemoryNoteService : INoteService
         // HashSet.Contains O(1): not başına etiket sayısı ne olursa olsun hızlı.
         // Set TagComparer ile kurulduğu için ?tag=ISTANBUL da "İstanbul" etiketini bulur.
         if (!string.IsNullOrWhiteSpace(tag))
-            notes = notes.Where(n => n.Tags.Contains(tag.Trim()));
+        {
+            // Trim'i bir kez yapıyoruz. Lambda bu değişkeni yakalar (closure),
+            // böylece her not için Trim tekrar çalışmaz.
+            var trimmedTag = tag.Trim();
+            notes = notes.Where(n => n.Tags.Contains(trimmedTag));
+        }
 
         // switch ifadesi: her sıralama seçeneği için bir sorgu.
         // ThenBy(Id): başlıklar aynıysa sıra her seferinde aynı olsun diye ikinci ölçüt.
