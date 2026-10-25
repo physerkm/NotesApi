@@ -7,8 +7,8 @@ public class Note
     public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     // HashSet: aynı etiket iki kez eklenmez.
-    // OrdinalIgnoreCase: "C#" ve "c#" aynı etiket sayılır.
-    public HashSet<string> Tags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    // TagComparer: "C#" = "c#", "İstanbul" = "ISTANBUL" = "istanbul", "LINQ" = "linq".
+    public HashSet<string> Tags { get; set; } = new(TagComparer.Instance);
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

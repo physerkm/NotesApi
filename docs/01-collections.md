@@ -66,7 +66,7 @@ Yeni kodda bunların yerine generic (`<T>`) versiyonları kullanırım.
 
 - Etiketler `Note.Tags` içinde `HashSet<string>` olarak tutuluyor:
   - Aynı etiket iki kez eklenmiyor. `Add` tekrar eden değeri sessizce yok sayıyor.
-  - Set `StringComparer.OrdinalIgnoreCase` ile kurulduğu için `"C#"` ve `"c#"` aynı etiket sayılıyor.
+  - Set kendi yazdığım `TagComparer` ile kurulduğu için `"C#"` ve `"c#"` aynı etiket sayılıyor (ayrıntı aşağıda: Türkçe I sorunu).
   - `?tag=` filtresindeki `Contains` çağrısı O(1) çalışıyor.
 - İstemci etiketleri düz bir `List<string>` olarak gönderiyor. Temizleme (boşları atma, `Trim`) ve tekrar ayıklama serviste yapılıyor.
 - Yanıtta etiketler `IReadOnlyCollection<string>` olarak dönüyor. Bu, içerideki setin kopyası (`ToArray()`). Dışarıya verilen nesne üzerinden içerideki veri değiştirilemiyor.
@@ -96,3 +96,21 @@ Yeni kodda bunların yerine generic (`<T>`) versiyonları kullanırım.
 - Aynı comparer'ı etiketleri sıralarken de kullanıyorum ki başlıklar ve etiketler aynı kurala uysun.
 - `OrderBy(...).ThenBy(n => n.Id)`: Başlıklar aynıysa sıranın her seferinde aynı kalması için ikinci bir ölçüt.
 - Sıralama seçenekleri bir `enum` (`NoteSort`). Geçersiz değerler (`?sort=abc`, `?sort=99`) otomatik olarak 400 döndürüyor.
+
+### Türkçe I sorunu ve kendi comparer'ım
+
+Türkçede `I → ı` ve `İ → i`, İngilizcede `I → i`. Etiketler iki dilde de olabildiği için hazır comparer'ların hiçbiri tek başına yetmedi:
+
+| Çift | `OrdinalIgnoreCase` | `tr-TR` ignoreCase |
+|---|---|---|
+| İstanbul / istanbul | farklı ❌ | aynı ✅ |
+| ISTANBUL / istanbul | aynı ✅ | farklı ❌ |
+| LINQ / linq | aynı ✅ | farklı ❌ |
+
+Çözüm olarak `EqualityComparer<string>` sınıfından türeyen `TagComparer` yazdım:
+
+- Karşılaştırmadan önce `İ`, `I`, `ı`, `i` harflerinin hepsini `i` yapıyor, sonra her şeyi küçük harfe çeviriyor.
+- Sonuç: `İstanbul = ISTANBUL = istanbul` ve `LINQ = linq`.
+- Bedeli: `ılık` ve `ilik` aynı etiket sayılıyor. Etiketlerde bu çok nadir, iki dilin de doğru çalışması daha önemli.
+- **Kural:** `Equals`'a göre eşit olan iki değerin `GetHashCode`'u da aynı olmalı. Bu yüzden ikisi de aynı `Normalize` metodunu kullanıyor. Kural bozulursa `HashSet` aynı etiketi farklı "kovalara" koyar ve tekrarları yakalayamaz.
+- Eşitlik için `TagComparer`, sıralama için `tr-TR` kullanıyorum. Kitaptaki gibi: `IEqualityComparer` "aynı mı?", `IComparer` "hangisi önce?" sorusunu cevaplıyor. İkisi farklı işler.

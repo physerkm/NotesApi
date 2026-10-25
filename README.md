@@ -8,6 +8,7 @@ Backend geliştirmeyi adım adım öğrenirken büyüttüğüm bir proje: her ye
 - [x] Not ekleme, listeleme, güncelleme, silme (CRUD)
 - [x] Gelen verinin doğrulanması (validation)
 - [x] Etiketler: tekrarsız, büyük/küçük harf duyarsız (`HashSet`) ve etikete göre filtreleme
+- [x] Türkçe I desteği: `İstanbul`, `ISTANBUL` ve `istanbul` aynı etiket, `LINQ` ve `linq` de aynı (özel `TagComparer`)
 - [x] Silmeyi geri alma: en son silinen not önce geri gelir (`ConcurrentStack`, LIFO)
 - [x] Sıralama: en yeni, en eski veya başlığa göre Türkçe alfabetik (`tr-TR` comparer)
 - [x] Swagger arayüzü ile tarayıcıdan test

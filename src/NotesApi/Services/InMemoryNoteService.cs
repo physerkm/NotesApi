@@ -29,7 +29,7 @@ public class InMemoryNoteService : INoteService
         IEnumerable<Note> notes = _notes.Values;
 
         // HashSet.Contains O(1): not başına etiket sayısı ne olursa olsun hızlı.
-        // Set OrdinalIgnoreCase ile kurulduğu için ?tag=CSHARP da "csharp" etiketini bulur.
+        // Set TagComparer ile kurulduğu için ?tag=ISTANBUL da "İstanbul" etiketini bulur.
         if (!string.IsNullOrWhiteSpace(tag))
             notes = notes.Where(n => n.Tags.Contains(tag.Trim()));
 
@@ -101,7 +101,7 @@ public class InMemoryNoteService : INoteService
     // Boş etiketleri atar, baş/son boşlukları siler, tekrarları HashSet ayıklar.
     private static HashSet<string> NormalizeTags(IEnumerable<string>? tags)
     {
-        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var set = new HashSet<string>(TagComparer.Instance);
         if (tags is null)
             return set;
 
