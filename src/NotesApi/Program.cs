@@ -5,7 +5,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // --- Servisler (Dependency Injection kayıtları) ---
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    // Swagger sayfasının en üstünde görünen başlık ve açıklama.
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Title = "NotesApi";
+        document.Info.Description =
+            "Not uygulaması REST API'si. Notlar etiketlenebilir, etikete göre filtrelenebilir, " +
+            "Türkçe alfabeye göre sıralanabilir ve silinen notlar geri alınabilir.";
+        return Task.CompletedTask;
+    });
+});
 
 // Hata yanıtlarını standart ProblemDetails (RFC 9457) biçiminde üretir.
 builder.Services.AddProblemDetails();

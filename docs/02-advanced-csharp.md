@@ -39,6 +39,20 @@ Beklenmeyen bir hata (ör. veritabanı bağlantısının kopması) olduğunda:
 
 Test ederken API'nin hatadan sonra çalışmaya devam ettiğini ve normal `404` yanıtlarının bozulmadığını da kontrol ettim.
 
+## Bu projede: Swagger açıklamaları (XML dokümantasyonu + attribute'lar)
+
+- `.csproj` içinde `<GenerateDocumentationFile>true</GenerateDocumentationFile>` açık. Derleyici `///` açıklamalarını
+  bir XML dosyasına çıkarıyor, .NET 10'un OpenAPI paketi de bu dosyadan Swagger açıklamalarını üretiyor.
+- Kullandığım etiketler: `<summary>` (kısa açıklama), `<remarks>` (ayrıntı), `<param>` (parametre),
+  `<response code="...">` (durum kodunun anlamı), `<c>` (satır içi kod).
+- Record'larda alan açıklamaları türün üstündeki `<param name="Title">` etiketleriyle yazılıyor.
+- `[ProducesResponseType]` attribute'u olmadan Swagger her endpoint'i sadece `200` dönüyormuş gibi gösteriyordu
+  (oysa `POST` `201`, `DELETE` `204` döner). Bu attribute ile her endpoint'in olası yanıtlarını belirttim.
+- Açıklaması olmayan her public üye için derleyici CS1591 uyarısı veriyor. Her üyeye açıklama zorunlu olmadığı için
+  `<NoWarn>` ile bu uyarıyı kapattım. Kitaptaki "gürültülü uyarıları bastır ki önemli olanlar görünsün" fikri.
+- Dikkat: XML içinde `&` yazmak için `&amp;` kullanmak gerekiyor ve Swagger bunu çözmeden `&amp;` olarak gösterdi.
+  Açıklamalarda `&` kullanmamak en temizi.
+
 ## Şimdilik atladıklarım
 
 `dynamic`, operator overloading, static polymorphism / generic math, `unsafe` kod ve pointer'lar,

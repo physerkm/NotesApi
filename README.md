@@ -11,7 +11,7 @@ Backend geliştirmeyi adım adım öğrenirken büyüttüğüm bir proje: her ye
 - [x] Türkçe I desteği: `İstanbul`, `ISTANBUL` ve `istanbul` aynı etiket, `LINQ` ve `linq` de aynı (özel `TagComparer`)
 - [x] Silmeyi geri alma: en son silinen not önce geri gelir (`ConcurrentStack`, LIFO)
 - [x] Sıralama: en yeni, en eski veya başlığa göre Türkçe alfabetik (`tr-TR` comparer)
-- [x] Swagger arayüzü ile tarayıcıdan test
+- [x] Swagger arayüzü ile tarayıcıdan test: her endpoint, parametre ve alan için açıklama ve olası durum kodları
 - [ ] Veritabanı (Entity Framework Core)
 - [x] Global hata yönetimi: beklenmeyen hatalarda düzenli `500` yanıtı, log ve `traceId`
 - [ ] Kullanıcı kaydı ve JWT ile giriş

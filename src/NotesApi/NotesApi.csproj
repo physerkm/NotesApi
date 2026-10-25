@@ -4,6 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- /// açıklamalarını XML dosyasına çıkarır; OpenAPI bu dosyadan Swagger açıklamalarını üretir. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: "public üyede XML açıklaması yok" uyarısı. Her üyeye açıklama zorunlu değil. -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
